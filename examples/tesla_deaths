@@ -1,0 +1,20 @@
+library(ggplot2)
+library(readxl)
+library(tidyverse)
+
+#Data retrieved from https://www.kaggle.com/datasets/thedevastator/tesla-accident-fatalities-analysis-and-statistic
+
+tes <- read.csv2("data/Tesla Deaths - Deaths (3).csv", sep = ",")
+
+#Data cleaning
+tes_hel <- tes %>% 
+  mutate(date = gsub("/.+/", "/", Date)) %>% 
+  group_by(date) %>%
+  summarize(deaths = sum(Deaths)) %>%
+  mutate(date = gsub("^.+/", "", date)) %>%
+  arrange(date)
+
+#Helical graphs
+tes_hel_dor <- data_prep(tes_hel$date, tes_hel$deaths)
+ptes <- helical_plot(tes_hel_dor, c("#0066CC","#99CCFF"),  y_label = "Tesla deaths") 
+
