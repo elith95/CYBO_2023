@@ -1,0 +1,21 @@
+library(ggplot2)
+library(readxl)
+library(tidyverse)
+
+#Data retrieved from https://www.kaggle.com/datasets/vainero/north-america-bear-killings
+
+bear <- read.csv2("data/north_america_bear_killings.csv", sep = ",")
+
+#Data cleaning
+bear_hel <- bear %>% 
+  mutate(date = gsub("...$", "", Date)) %>%
+  group_by(date) %>%
+  summarize(attacks = length(date)) %>%
+  mutate(year = gsub("...$", "", date)) %>%
+  group_by(year) %>%
+  summarize(attacks = sum(attacks))
+
+#Helical graph
+bear_hel_dor <- data_prep(bear_hel$year, bear_hel$attacks, 0.6, 0.5)
+pbear <- helical_plot(bear_hel_dor, c("#663300", "#CC9966"), y_label = "Bears' attacks in North America") 
+
