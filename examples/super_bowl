@@ -1,0 +1,31 @@
+library(ggplot2)
+library(readxl)
+library(tidyverse)
+
+#Data retrieved from https://www.kaggle.com/datasets/mattop/super-bowl-television-ratings
+
+sup <- read.csv2("data/super-bowl-ratings.csv", sep = ",")
+
+#Data cleaning
+sup_hel <- sup %>%
+  mutate(date = gsub("-.+", "", date)) 
+
+#Helical graph
+fancy_scientific <- function(l) {
+  l <- format(l, scientific = TRUE)
+  l <- sapply(l, function(x) {
+    if(x == "0e+00" || x == "0.0e+00") { 
+      return(parse(text = "0")) } else {
+        x <- gsub("^(.*)e", "'\\1'e", x)
+        x <- gsub("e", "%*%10^", x)
+        parse(text = x)
+      }
+  })
+}
+
+sup_hel_dor <- data_prep(sup_hel$date, sup_hel$cost_of_30_second_ad_usd, 0.5, 0.5)
+psup <- helical_plot(sup_hel_dor, c("#CC0000", "#FFCC33"), y_label = "Cost of a 30 second AD during the Super Bowl (usd)") +
+  scale_y_continuous(labels = fancy_scientific) +
+  scale_x_continuous(labels = fancy_scientific)
+  
+  
