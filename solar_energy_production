@@ -1,0 +1,38 @@
+library(ggplot2)
+library(readxl)
+library(tidyverse)
+
+#Data retrieved from https://www.kaggle.com/datasets/mattop/daily-solar-power-generation
+
+sol <- read.csv2("data/solar.csv", sep = ",")
+
+#Data cleaning
+sol_hel <- sol %>%
+  drop_na(watt_avg) %>%
+  mutate(date = gsub("/../", "/", date)) %>%
+  separate(date, into = c("month", "year"), sep = "/") %>%
+  mutate(date = paste(year, month, sep = "/")) %>%
+  arrange(date) %>% 
+  group_by(date) %>%
+  summarize(watt_avg = sum(watt_avg, na.rm = T)) %>%
+  filter(watt_avg > 0) %>%
+  mutate(date = gsub("/..$", "", date))
+
+#Helical graph
+fancy_scientific <- function(l) {
+  l <- format(l, scientific = TRUE)
+  l <- sapply(l, function(x) {
+    if(x == "0e+00" || x == "0.0e+00") { 
+      return(parse(text = "0")) } else {
+        x <- gsub("^(.*)e", "'\\1'e", x)
+        x <- gsub("e", "%*%10^", x)
+        parse(text = x)
+      }
+  })
+}
+  
+sol_hel_dor <- data_prep(sol_hel$date, sol_hel$watt_avg, 0.6, 0.6)
+psol <- helical_plot(sol_hel_dor, c("#FFCC33", "#FFFF00"), y_label = "Solar power generation in Bloomington (watt)") +
+  scale_y_continuous(labels = fancy_scientific) +
+  scale_x_continuous(labels = fancy_scientific)
+
