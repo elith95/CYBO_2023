@@ -1,0 +1,32 @@
+library(ggplot2)
+library(readxl)
+library(tidyverse)
+
+#Data retrieved from https://www.kaggle.com/datasets/johnny1994/list-of-mass-shootings-in-the-united-states-raw
+
+sht <- lapply(3:24, function(i) {
+  df <- read_excel("data/List of mass shootings in the United States.xlsx", sheet = i)
+  colnames(df) <- c("date", "location", "dead", "injured", "total", "description")
+  df$date <- as.character(df$date)
+  df$dead <- as.numeric(gsub("[^0-9.-]", "", df$dead))
+  df$injured <- as.numeric(gsub("[^0-9.-]", "", df$injured))
+  df$total <- as.numeric(gsub("[^0-9.-]", "", df$total))
+  return(df)
+})
+sht <- do.call(rbind, sht) 
+
+#Data cleaning
+sht_hel <- sht %>%
+  mutate(y = gsub(",", "", date)) %>%
+  mutate(y = gsub("-", " ", y)) %>%
+  mutate(year = as.list(strsplit(y, " "))) %>%
+  unnest(year) %>% 
+  mutate(word_length = str_length(year)) %>% 
+  filter(word_length == 4 & grepl("^[0-9]+$", year)) %>%
+  group_by(year) %>%
+  summarize(deaths = sum(dead))
+
+#Helical graph
+sht_hel_dor <- data_prep(sht_hel$year, sht_hel$deaths, 0.5, 0.5)
+psht <- helical_plot(sht_hel_dor, c("#660000", "#CC6666"), y_label = "Mass shooting deaths USA") 
+
