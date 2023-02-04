@@ -1,0 +1,32 @@
+library(ggplot2)
+library(readxl)
+library(tidyverse)
+
+#Data retrieved from https://www.kaggle.com/datasets/nguyenthicamlai/population-2022
+
+pop <- read.csv2("data/population.csv", sep = ",")
+
+#Data cleaning
+pop_hel <- pop %>% 
+  arrange(Year) %>% 
+  group_by(Year) %>%
+  summarize(Population = sum(Population, na.rm = T))
+
+#Helical graph
+fancy_scientific <- function(l) {
+  l <- format(l, scientific = TRUE)
+  l <- sapply(l, function(x) {
+    if(x == "0e+00" || x == "0.0e+00") { 
+      return(parse(text = "0")) } else {
+        x <- gsub("^(.*)e", "'\\1'e", x)
+        x <- gsub("e", "%*%10^", x)
+        parse(text = x)
+      }
+  })
+}
+
+pop_hel_dor <- data_prep(pop_hel$Year, pop_hel$Population, 1, 1)
+ppop <- helical_plot(pop_hel_dor, c("#003333", "#669999"), y_label = "World Population") +
+  scale_y_continuous(labels = fancy_scientific) +
+  scale_x_continuous(labels = fancy_scientific)
+
