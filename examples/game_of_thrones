@@ -1,0 +1,22 @@
+library(ggplot2)
+library(readxl)
+library(tidyverse)
+
+#Data retrieved from https://github.com/washingtonpost/data-game-of-thrones-deaths/blob/master/README.md
+
+got <- read.csv2("data/got.csv", sep = ",")
+
+#Data cleaning
+got$episode <- ifelse(got$episode != 10, sub("(.)", "0\\1", as.character(got$episode)), "10")
+got_hel <- got %>% 
+  drop_na(season) %>%
+  unite("eps", season:episode, remove = F) %>%
+  group_by(eps) %>%
+  summarize(deaths = length(character_killed)) %>% 
+  arrange(eps) %>%
+  mutate(eps = gsub("^(.)(_..)$", "\\1", eps))
+
+#Helical graph
+got_hel_dor <- data_prep(got_hel$eps, got_hel$deaths, 1, 1)
+pgot <- helical_plot(got_hel_dor, c("#333333", "#999999"), y_label = "GOT on screen deaths per episode")
+
