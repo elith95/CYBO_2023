@@ -1,0 +1,20 @@
+library(ggplot2)
+library(readxl)
+library(tidyverse)
+
+#The dataset was retrieved from https://www.kaggle.com/datasets/johnny1994/divorce-rates-data-should-you-get-married
+
+div_rates <- read_xlsx("data/Divorce Rates.xlsx", sheet = 2)
+
+#Data cleaning
+div_hel <- div_rates %>%
+  mutate(`Data Source Year` = str_replace_all(`Data Source Year`, pattern = "[()]", replacement = "")) %>%
+  arrange(`Data Source Year`) %>% 
+  filter(`Data Source Year`!= "?") %>%
+  group_by(`Data Source Year`) %>%
+  summarize(mean_perc = mean(Percent, na.rm = T)) 
+
+#Helical
+div_hel_dor <- data_prep(div_hel$`Data Source Year`, div_hel$mean_perc)
+pdiv <- helical_plot(div_hel_dor, c("#669900", "#99FF33"), y_label = "Global Divorce rate (%)")
+
