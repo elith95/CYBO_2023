@@ -1,0 +1,18 @@
+library(ggplot2)
+library(readxl)
+library(tidyverse)
+
+#Data retrieved from https://www.kaggle.com/datasets/devrimtuner/list-of-films-that-most-frequently-use-the-word
+
+fw <- read.csv2("data/List of films that most frequently use the word fuck11.csv", sep = ",")
+
+#Data cleaning
+fw_hel <- fuckw %>%
+  arrange(Year) %>% 
+  group_by(Year) %>%
+  summarize(count = max(Count, na.rm = T)) 
+
+#Helical graph
+fw_hel_dor <- data_prep(fuckw_hel$Year, fuckw_hel$count, 0.5, 0.5)
+pfw <- helical_plot(fw_hel_dor, c("#660033", "#CC0099"), y_label = "F word in movies count")
+
