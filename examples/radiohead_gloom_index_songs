@@ -8,11 +8,11 @@ rh <- read.csv2("data/radiohead.csv", sep = ",")
 
 #Data cleaning
 rh_hel <- rh %>%
-  group_by(album_name, album_release_year) %>%
+  group_by(album_release_year) %>%
   summarize(gloom_index = mean(as.numeric(gloom_index), na.rm = T)) %>%
   arrange(album_release_year)
 
 #Helical graph
-rh_hel_dor <- data_prep(rh_hel$album_name, rh_hel$gloom_index, 1, 1)
+rh_hel_dor <- data_prep(rh_hel$album_release_year, rh_hel$gloom_index, 1, 1)
 prh <- helical_plot(rh_hel_dor, c("#330099", "#9933CC"), y_label = "Radiohead's albums gloomy index") #label size 3
 
